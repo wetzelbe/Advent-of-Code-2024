@@ -1,9 +1,13 @@
 pub fn solve(path: std::path::PathBuf) {
-    let sum = calculate_sum_of_distances(path);
-    println!(" The sum is {:?}", sum)
+
+    let sets = parse_input(path);
+    let similarity = calculate_similarity(&sets.0, &sets.1);
+    let sum = calculate_sum_of_distances(sets.0, sets.1);
+    println!(" The sum is {:?}", sum);
+    println!(" The similarity is {:?}", similarity);
 }
 
-fn calculate_sum_of_distances(path: std::path::PathBuf) -> u32 {
+fn parse_input(path: std::path::PathBuf) -> (Vec<u32>, Vec<u32>) {
     let content = std::fs::read_to_string(&path).expect("could not read file");
 
     let mut set1: Vec<u32> = Vec::new();
@@ -22,6 +26,10 @@ fn calculate_sum_of_distances(path: std::path::PathBuf) -> u32 {
         set2.push(second_value);
     }
 
+    return (set1, set2);
+}
+
+fn calculate_sum_of_distances(mut set1: Vec<u32>, mut set2: Vec<u32>) -> u32 {
     // sort our vectors
     set1.sort();
     set2.sort();
@@ -36,6 +44,17 @@ fn calculate_sum_of_distances(path: std::path::PathBuf) -> u32 {
     return sum;
 }
 
+fn calculate_similarity(set1: &Vec<u32>, set2: &Vec<u32>) -> u32 {
+    let mut score: u32 = 0;
+
+    for value in set1 {
+        let count = set2.iter().filter(|x| **x == *value).count() as u32;
+        score += value * count;
+    }
+
+    return score;
+}
+
 
 #[cfg(test)]
 mod tests {
@@ -44,8 +63,16 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test() {
+    fn test_sum() {
         let path = PathBuf::from("./resources/day1_test.txt");
-        assert_eq!(calculate_sum_of_distances(path), 11);
+        let sets = parse_input(path);
+        assert_eq!(calculate_sum_of_distances(sets.0, sets.1), 11);
+    }
+
+    #[test]
+    fn test_similarity() {
+        let path = PathBuf::from("./resources/day1_test.txt");
+        let sets = parse_input(path);
+        assert_eq!(calculate_similarity(&sets.0, &sets.1), 31);
     }
 }
