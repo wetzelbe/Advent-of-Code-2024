@@ -73,7 +73,6 @@ fn dampened_is_safe(report: &Vec<u32>) -> bool {
         if is_safe(&report_copy) {
             return true;
         }
-
     }
     return false;
 }
