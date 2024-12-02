@@ -1,6 +1,7 @@
 use clap::Parser;
 
 mod day1;
+mod day2;
 
 #[derive(Parser)]
 struct Cli {
@@ -13,6 +14,7 @@ fn main() {
 
     match args.day {
         1 => day1::solve(args.path),
+        2 => day2::solve(args.path),
         _ => println!("This day has not been implemented yet!"),
     }
 }
