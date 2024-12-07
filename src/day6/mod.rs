@@ -272,7 +272,7 @@ mod tests {
     #[test]
     fn test_part1() {
         let input = parse_input(PathBuf::from("./resources/day6_test.txt"));
-        assert_eq!(solve_part1(&input).1, 18);
+        assert_eq!(solve_part1(&input).1, 41);
     }
 
     
