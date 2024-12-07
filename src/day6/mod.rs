@@ -100,30 +100,30 @@ fn solve_part1(input: &ndarray::Array2<char>) -> (ndarray::Array2<char>, u32) {
     return (solution, count);
 }
 
-fn produces_loop(current_solution: &ndarray::Array2<char>, position_ahead: (usize, usize), position: (usize, usize)) -> bool {
-    println!("Testing position ({}, {})", position_ahead.0, position_ahead.1);
-    let mut solution: Array2<String> = ndarray::Array::from_shape_vec(current_solution.dim(),current_solution.flatten().into_iter().map(|c| String::from(c)).collect()).expect("Could not convert to array with list as elements");
+fn produces_loop(current_solution: &ndarray::Array2<String>, position_ahead: (usize, usize), position: (usize, usize)) -> bool {
+    let mut solution: Array2<String> = current_solution.clone();
     solution[[position_ahead.0, position_ahead.1]].push('#');
-    let direction = current_solution[[position.0, position.1]];
+
+    if solution[[position_ahead.0, position_ahead.1]].contains('^') 
+        || solution[[position_ahead.0, position_ahead.1]].contains('>')
+        || solution[[position_ahead.0, position_ahead.1]].contains('<')
+        || solution[[position_ahead.0, position_ahead.1]].contains('d') {
+            return false
+        }
+
+    let direction = current_solution[[position.0, position.1]].chars().last().expect("Could not get starting point");
 
     let mut first = true;
-    let mut iterations: u32 = 0;
 
     let mut current_position = position;
     let mut current_direction = direction.clone();
 
     loop {
-        iterations += 1;
-        //println!("{:#}", solution);
-        println!("{}", iterations);
-
         if first {
             first = false;
         } else {
-            if current_position == position && current_direction == direction {
+            if solution[[current_position.0, current_position.1]].contains(current_direction) {
                 return true;
-            } else if solution[[current_position.0, current_position.1]].contains(current_direction) {
-                return false;
             } else {
                 solution[[current_position.0, current_position.1]].push(current_direction);
             }
@@ -180,84 +180,86 @@ fn produces_loop(current_solution: &ndarray::Array2<char>, position_ahead: (usiz
 
 fn solve_part2(input: &ndarray::Array2<char>) -> u32 {
     let mut out_of_bounds = false;
+    let start_position = current_position(&input);
+    let start_direction = input[[start_position.0, start_position.1]];
 
-    let mut solution = input.clone();
+    let mut solution: Array2<String> = ndarray::Array::from_shape_vec(input.dim(),input.flatten().into_iter().map(|c| String::from(c)).collect()).expect("Could not convert to array with list as elements");
     let mut obstacle_positions: Vec<(usize, usize)> = Vec::new();
-    let start_position = current_position(&solution);
 
+    let mut current_position = start_position;
+    let mut current_direction = start_direction;
+
+    let mut first = true;
     while !out_of_bounds {
-        let current_position = current_position(&solution);
-        let current_direction = solution[[current_position.0, current_position.1]];
+        if first {
+            first = false;
+        } else {
+            solution[[current_position.0, current_position.1]].push(current_direction);
+        }
 
         // Check obstruction
         if current_direction == '^' {
             if current_position.0 == 0 {
-                solution[[current_position.0, current_position.1]] = 'X';
+                solution[[current_position.0, current_position.1]].push('^');
                 out_of_bounds = true;
             } else {
                 let position_ahead = (current_position.0 - 1, current_position.1);
-                if solution[[position_ahead.0, position_ahead.1]] == '#' {
-                    solution[[current_position.0, current_position.1]] = '>';
+                if solution[[position_ahead.0, position_ahead.1]].contains('#') {
+                    current_direction = '>';
                 } else {
                     if !obstacle_positions.contains(&position_ahead) && produces_loop(&solution, position_ahead, current_position) {
                         obstacle_positions.push(position_ahead);
                     }
-                    solution[[current_position.0, current_position.1]] = 'X';
-                    solution[[position_ahead.0, position_ahead.1]] = current_direction;
+                    current_position = position_ahead;
                 }
             }
         } else if current_direction == '>' {
             if current_position.1 == solution.dim().1 - 1 {
-                solution[[current_position.0, current_position.1]] = 'X';
+                solution[[current_position.0, current_position.1]].push('>');
                 out_of_bounds = true;
             } else {
                 let position_ahead = (current_position.0, current_position.1 + 1);
-                if solution[[position_ahead.0, position_ahead.1]] == '#' {
-                    solution[[current_position.0, current_position.1]] = 'd';
+                if solution[[position_ahead.0, position_ahead.1]].contains('#') {
+                    current_direction = 'd';
                 } else {
                     if !obstacle_positions.contains(&position_ahead) && produces_loop(&solution, position_ahead, current_position) {
                         obstacle_positions.push(position_ahead);
                     }
-                    solution[[current_position.0, current_position.1]] = 'X';
-                    solution[[position_ahead.0, position_ahead.1]] = current_direction;
+                    current_position = position_ahead;
                 }
             }
         } else if current_direction == 'd' {
             if current_position.0 == solution.dim().0 - 1 {
-                solution[[current_position.0, current_position.1]] = 'X';
+                solution[[current_position.0, current_position.1]].push('d');
                 out_of_bounds = true;
             } else {
                 let position_ahead = (current_position.0 + 1, current_position.1);
-                if solution[[position_ahead.0, position_ahead.1]] == '#' {
-                    solution[[current_position.0, current_position.1]] = '<';
+                if solution[[position_ahead.0, position_ahead.1]].contains('#') {
+                    current_direction = '<';
                 } else {
                     if !obstacle_positions.contains(&position_ahead) && produces_loop(&solution, position_ahead, current_position) {
                         obstacle_positions.push(position_ahead);
                     }
-                    solution[[current_position.0, current_position.1]] = 'X';
-                    solution[[position_ahead.0, position_ahead.1]] = current_direction;
+                    current_position = position_ahead;
                 }
             }
         } else if current_direction == '<' {
             if current_position.1 == 0 {
-                solution[[current_position.0, current_position.1]] = 'X';
+                solution[[current_position.0, current_position.1]].push('<');
                 out_of_bounds = true;
             } else {
                 let position_ahead = (current_position.0, current_position.1 - 1);
-                if solution[[position_ahead.0, position_ahead.1]] == '#' {
-                    solution[[current_position.0, current_position.1]] = '^';
+                if solution[[position_ahead.0, position_ahead.1]].contains('#') {
+                    current_direction = '^';
                 } else {
                     if !obstacle_positions.contains(&position_ahead) && produces_loop(&solution, position_ahead, current_position) {
                         obstacle_positions.push(position_ahead);
                     }
-                    solution[[current_position.0, current_position.1]] = 'X';
-                    solution[[position_ahead.0, position_ahead.1]] = current_direction;
+                    current_position = position_ahead;
                 }
             }
         }
     }
-    println!("Start position: {},{}", start_position.0, start_position.1);
-    println!("{:?}", obstacle_positions);
     return obstacle_positions.iter().count() as u32;
 }
 
