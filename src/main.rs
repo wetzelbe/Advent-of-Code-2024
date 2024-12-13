@@ -12,6 +12,7 @@ mod day9;
 mod day10;
 mod day11;
 mod day12;
+mod day13;
 
 #[derive(Parser)]
 struct Cli {
@@ -36,6 +37,7 @@ fn main() {
         10 => day10::solve(args.path),
         11 => day11::solve(args.path, args.iterations),
         12 => day12::solve(args.path),
+        13 => day13::solve(args.path),
         _ => println!("This day has not been implemented yet!"),
     }
 }
