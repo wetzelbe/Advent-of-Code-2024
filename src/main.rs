@@ -13,12 +13,14 @@ mod day10;
 mod day11;
 mod day12;
 mod day13;
+mod day14;
 
 #[derive(Parser)]
 struct Cli {
     day: u8,
     path: std::path::PathBuf,
-    iterations: Option<usize>
+    a1: Option<usize>,
+    a2: Option<usize>,
 }
 
 fn main() {
@@ -35,9 +37,10 @@ fn main() {
         8 => day8::solve(args.path),
         9 => day9::solve(args.path),
         10 => day10::solve(args.path),
-        11 => day11::solve(args.path, args.iterations),
+        11 => day11::solve(args.path, args.a1),
         12 => day12::solve(args.path),
         13 => day13::solve(args.path),
+        14 => day14::solve(args.path, args.a1, args.a2),
         _ => println!("This day has not been implemented yet!"),
     }
 }
